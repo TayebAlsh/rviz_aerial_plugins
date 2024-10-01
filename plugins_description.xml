@@ -1,0 +1,31 @@
+<library path="rviz_aerial_plugins">
+
+  <class
+    name="rviz_aerial_plugins/Battery"
+    type="rviz_aerial_plugins::displays::BatteryDisplay"
+    base_class_type="rviz_common::Display">
+    <description>
+      Displays battery status
+    </description>
+    <message_type>px4_msgs/msg/BatteryStatus</message_type>
+  </class>
+
+  <class
+    name="rviz_aerial_plugins/FlighInfo"
+    type="rviz_aerial_plugins::displays::FlighInfoDisplay"
+    base_class_type="rviz_common::Panel">
+    <description>
+      Displays flight information.
+    </description>
+  </class>
+
+  <class
+    name="rviz_aerial_plugins/Goal3D"
+    type="rviz_aerial_plugins::displays::Goal3DDisplay"
+    base_class_type="rviz_common::Panel">
+    <description>
+      Goal 3D
+    </description>
+  </class>
+
+</library>
