@@ -19,13 +19,13 @@ VehicleInformationWidget::VehicleInformationWidget(QWidget* parent)
   QFont font = QFont();
   font.setBold(true);
 
-  alt_text = new QLabel("Alt (Rel)(m)");
+  alt_text = new QLabel("Depth (m)");
   alt_label = new QLabel("-0.1");
   alt_text->setAlignment(Qt::AlignCenter);
   alt_label->setAlignment(Qt::AlignCenter);
   alt_text->setFont(font);
 
-  ground_speed_text = new QLabel("Ground Speed (m/s)");
+  ground_speed_text = new QLabel("Tempreture (Celcius)");
   ground_speed_label = new QLabel("0.0");
   ground_speed_text->setAlignment(Qt::AlignCenter);
   ground_speed_label->setAlignment(Qt::AlignCenter);

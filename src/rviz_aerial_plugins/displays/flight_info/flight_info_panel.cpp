@@ -14,7 +14,7 @@
 
 #include "rviz_aerial_plugins/displays/flight_info/flight_info_panel.hpp"
 #include "rviz_common/load_resource.hpp"
-
+#include "atl_msgs/msg/depth.hpp"
 namespace rviz_aerial_plugins
 {
 
@@ -26,8 +26,8 @@ FlighInfoDisplay::FlighInfoDisplay(QWidget* parent):
 {
   // setIcon(rviz_common::loadPixmap("package://rviz_aerial_plugins/icons/classes/Battery.png"));
 
-  odometry_topic_name_ = "/iris_0/odometry";
-  attitude_topic_name_ = "/iris_0/attitude";
+  odometry_topic_name_ = "/depth";
+  attitude_topic_name_ = "/imu";
 }
 
 FlighInfoDisplay::~FlighInfoDisplay()
@@ -94,8 +94,8 @@ void FlighInfoDisplay::on_changed_namespace(const QString& text)
 {
   std::string namespace_str(text.toUtf8().constData());
 
-  attitude_topic_name_ = "/" + namespace_str + "/attitude";
-  odometry_topic_name_ = "/" + namespace_str + "/odometry";
+  attitude_topic_name_ = "/imu";
+  odometry_topic_name_ = "/depth";
   vehicle_attitude_sub_.reset();
   vehicle_odometry_sub_.reset();
 
@@ -104,40 +104,42 @@ void FlighInfoDisplay::on_changed_namespace(const QString& text)
 
 void FlighInfoDisplay::subcribe2topics()
 {
-  vehicle_attitude_sub_ = rviz_ros_node_.lock()->get_raw_node()->
-      template create_subscription<proposed_aerial_msgs::msg::Attitude>(
-        attitude_topic_name_,
-      10,
-      [this](proposed_aerial_msgs::msg::Attitude::ConstSharedPtr msg) {
-
-        geometry_msgs::msg::Quaternion q;
-        q.x = msg->orientation.x;
-        q.y = msg->orientation.y;
-        q.z = msg->orientation.z;
-        q.w = msg->orientation.w;
-        double yaw, pitch, roll;
-        tf2::getEulerYPR(q, yaw, pitch, roll);
-        compass_widget_->setAngle(yaw*180/3.1416);
-        compass_widget_->update();
-        adi_widget_->setPitch(pitch*180/3.1416);
-        adi_widget_->setRoll(-roll*180/3.1416);
-        adi_widget_->update();
-    });
-  RCLCPP_INFO(rviz_ros_node_.lock()->get_raw_node()->get_logger(),
-                "FlighInfoDisplay: %s", attitude_topic_name_.c_str());
-  vehicle_odometry_sub_ = rviz_ros_node_.lock()->get_raw_node()->
-        template create_subscription<nav_msgs::msg::Odometry>(
-          odometry_topic_name_,
+// Subscription to the IMU topic using the same variable name
+    vehicle_attitude_sub_ = rviz_ros_node_.lock()->get_raw_node()->
+    create_subscription<sensor_msgs::msg::Imu>(
+        "/imu", // Replace with your actual IMU topic name
         10,
-        [this](nav_msgs::msg::Odometry::ConstSharedPtr msg) {
-          vi_widget_->setGroundSpeed(sqrt(msg->twist.twist.linear.x*msg->twist.twist.linear.x
-                                        + msg->twist.twist.linear.y*msg->twist.twist.linear.y));
-          vi_widget_->setAlt(-msg->pose.pose.position.z);
-          vi_widget_->update();
+        [this](const sensor_msgs::msg::Imu::SharedPtr msg) {
+            // Process the IMU data
+            geometry_msgs::msg::Quaternion q = msg->orientation;
 
-      });
-  RCLCPP_INFO(rviz_ros_node_.lock()->get_raw_node()->get_logger(),
-                "FlighInfoDisplay: %s", odometry_topic_name_.c_str());
+            double yaw, pitch, roll;
+            tf2::getEulerYPR(q, yaw, pitch, roll);
+            
+            // Update widgets based on IMU data
+            compass_widget_->setAngle(yaw * 180 / M_PI);
+            compass_widget_->update();
+            adi_widget_->setPitch(pitch * 180 / M_PI);
+            adi_widget_->setRoll(-roll * 180 / M_PI);
+            adi_widget_->update();
+        }
+    );
+
+RCLCPP_INFO(rviz_ros_node_.lock()->get_raw_node()->get_logger(),
+             "FlighInfoDisplay: IMU topic subscribed to /imu");
+                
+                
+    vehicle_odometry_sub_ = rviz_ros_node_.lock()->get_raw_node()->create_subscription<atl_msgs::msg::Depth>(
+    "/depth",
+    10,
+    [this](const atl_msgs::msg::Depth::SharedPtr msg) { // Use SharedPtr to match the expected argument type
+        // Use the actual data from the message
+        vi_widget_->setGroundSpeed(-msg->temperature); // Set ground speed to negative depth (example)
+        vi_widget_->setAlt(msg->depth);          // Set altitude to the depth value
+        vi_widget_->update();
+    });
+
+
 
 }
 

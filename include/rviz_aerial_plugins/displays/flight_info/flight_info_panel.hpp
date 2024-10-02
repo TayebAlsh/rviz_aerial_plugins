@@ -37,6 +37,8 @@
 #include "rviz_common/ros_integration/ros_node_abstraction_iface.hpp"
 #include "rviz_common/properties/ros_topic_property.hpp"
 #include "tf2/utils.h"
+#include "atl_msgs/msg/depth.hpp"
+#include <sensor_msgs/msg/imu.hpp> 
 #endif
 
 namespace rviz_aerial_plugins
@@ -56,8 +58,9 @@ public:
   void onInitialize() override;
 
 private:
-  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr vehicle_odometry_sub_;
-  rclcpp::Subscription<proposed_aerial_msgs::msg::Attitude>::SharedPtr vehicle_attitude_sub_;
+  rclcpp::Subscription<atl_msgs::msg::Depth>::SharedPtr vehicle_odometry_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr vehicle_attitude_sub_;
+
 
   void subcribe2topics();
   void add_namespaces_to_combobox();
