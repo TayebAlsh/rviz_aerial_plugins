@@ -124,7 +124,7 @@ void FlighInfoDisplay::subcribe2topics()
             compass_widget_->setAngle(yaw * 180 / M_PI);
             compass_widget_->update();
             adi_widget_->setPitch(pitch * 180 / M_PI);
-            adi_widget_->setRoll(-roll * 180 / M_PI);
+            adi_widget_->setRoll(roll * 180 / M_PI);
             adi_widget_->update();
         }
     );
