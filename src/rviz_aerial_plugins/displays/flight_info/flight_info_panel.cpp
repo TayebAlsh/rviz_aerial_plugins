@@ -15,6 +15,10 @@
 #include "rviz_aerial_plugins/displays/flight_info/flight_info_panel.hpp"
 #include "rviz_common/load_resource.hpp"
 #include "atl_msgs/msg/depth.hpp"
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+
 namespace rviz_aerial_plugins
 {
 

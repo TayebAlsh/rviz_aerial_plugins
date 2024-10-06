@@ -69,6 +69,7 @@ find_package(visualization_msgs REQUIRED)
 find_package(proposed_aerial_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(atl_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 # These need to be added in the add_library() call so AUTOMOC detects them.
 set(rviz_aerial_plugins_headers_to_moc
@@ -127,6 +128,7 @@ ament_target_dependencies(rviz_aerial_plugins
   proposed_aerial_msgs
   nav_msgs
   atl_msgs
+  tf2_geometry_msgs
 )
 
 ament_export_include_directories(include)
