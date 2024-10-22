@@ -30,6 +30,13 @@ VehicleInformationWidget::VehicleInformationWidget(QWidget* parent)
   ground_speed_text->setAlignment(Qt::AlignCenter);
   ground_speed_label->setAlignment(Qt::AlignCenter);
   ground_speed_text->setFont(font);
+  
+  ping_text = new QLabel("Ping (mm)");
+  ping_label = new QLabel("0.00");
+  ping_text->setAlignment(Qt::AlignCenter);
+  ping_label->setAlignment(Qt::AlignCenter);
+  ping_text->setFont(font);
+
 
   QGroupBox* groupBox = new QGroupBox();
 
@@ -38,6 +45,8 @@ VehicleInformationWidget::VehicleInformationWidget(QWidget* parent)
   topic_layout->addWidget( alt_label );
   topic_layout->addWidget( ground_speed_text );
   topic_layout->addWidget( ground_speed_label );
+  topic_layout->addWidget( ping_text );
+  topic_layout->addWidget( ping_label );
 
   groupBox->setLayout(topic_layout);
 
@@ -59,4 +68,9 @@ void VehicleInformationWidget::setGroundSpeed(float speed)
 void VehicleInformationWidget::setAlt(float alt)
 {
   alt_label->setText(QString("%1").arg(alt));
+}
+
+void VehicleInformationWidget::setPingDistance(float distance) {
+
+    ping_label->setText(QString("%1").arg(distance));
 }

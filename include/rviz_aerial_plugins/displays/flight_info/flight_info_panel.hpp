@@ -39,6 +39,8 @@
 #include "tf2/utils.h"
 #include "atl_msgs/msg/depth.hpp"
 #include <sensor_msgs/msg/imu.hpp> 
+#include "std_msgs/msg/float32.hpp"
+
 #endif
 
 namespace rviz_aerial_plugins
@@ -60,6 +62,8 @@ public:
 private:
   rclcpp::Subscription<atl_msgs::msg::Depth>::SharedPtr vehicle_odometry_sub_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr vehicle_attitude_sub_;
+  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr ping_distance_sub_;
+
 
 
   void subcribe2topics();
@@ -77,6 +81,7 @@ protected:
   QComboBox* namespace_;
   std::string attitude_topic_name_;
   std::string odometry_topic_name_;
+  std::string ping_topic_name_;
 };
 
 } // namespace displays

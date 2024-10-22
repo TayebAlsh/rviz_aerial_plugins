@@ -32,6 +32,7 @@ FlighInfoDisplay::FlighInfoDisplay(QWidget* parent):
 
   odometry_topic_name_ = "/depth";
   attitude_topic_name_ = "/imu";
+  ping_topic_name_ = "/ping";
 }
 
 FlighInfoDisplay::~FlighInfoDisplay()
@@ -100,6 +101,7 @@ void FlighInfoDisplay::on_changed_namespace(const QString& text)
 
   attitude_topic_name_ = "/imu";
   odometry_topic_name_ = "/depth";
+  ping_topic_name_ = "/ping";
   vehicle_attitude_sub_.reset();
   vehicle_odometry_sub_.reset();
 
@@ -143,6 +145,14 @@ RCLCPP_INFO(rviz_ros_node_.lock()->get_raw_node()->get_logger(),
         vi_widget_->update();
     });
 
+
+    ping_distance_sub_ = rviz_ros_node_.lock()->get_raw_node()->create_subscription<std_msgs::msg::Float32>(
+    "/ping",
+    10,
+    [this](const std_msgs::msg::Float32::SharedPtr msg) {
+        vi_widget_->setPingDistance(msg->data);  // Example: Use ping data to set ground speed
+        vi_widget_->update();
+    });
 
 
 }

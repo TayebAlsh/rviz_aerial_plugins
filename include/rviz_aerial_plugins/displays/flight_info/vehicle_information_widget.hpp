@@ -29,6 +29,7 @@ public:
 
     void setAlt(float alt);
     void setGroundSpeed(float speed);
+    void setPingDistance(float distance);
     void setFlightTime();
 
 private:
@@ -36,6 +37,9 @@ private:
     QLabel* ground_speed_text;
     QLabel* alt_label;
     QLabel* ground_speed_label;
+    QLabel* ping_text;
+    QLabel* ping_label;
+    
 };
 
 #endif // VEHICLE_INFORMATION_WIDGET_H
