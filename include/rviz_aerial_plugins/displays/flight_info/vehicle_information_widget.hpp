@@ -29,8 +29,10 @@ public:
 
     void setAlt(float alt);
     void setGroundSpeed(float speed);
-    void setPingDistance(float distance);
+    void setPingInfo(float distance,float confidence);
     void setFlightTime();
+    void setHeartbeat(const QString& pi_status, const QString& teensy_status);
+    void setRollStatus(bool active);
 
 private:
     QLabel* alt_text;
@@ -39,6 +41,10 @@ private:
     QLabel* ground_speed_label;
     QLabel* ping_text;
     QLabel* ping_label;
+    QLabel* heartbeat_text;
+    QLabel* heartbeat_label;
+    QLabel* roll_text;
+    QLabel* roll_label;
     
 };
 

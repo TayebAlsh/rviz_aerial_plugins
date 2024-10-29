@@ -37,6 +37,19 @@ VehicleInformationWidget::VehicleInformationWidget(QWidget* parent)
   ping_label->setAlignment(Qt::AlignCenter);
   ping_text->setFont(font);
 
+  heartbeat_text = new QLabel("Heartbeat (Pi, Teensy):");
+  heartbeat_label = new QLabel("No Signal, No Signal");
+  heartbeat_text->setAlignment(Qt::AlignCenter);
+  heartbeat_label->setAlignment(Qt::AlignCenter);
+  heartbeat_text->setFont(font);
+
+    // New Roll Controller Indicator
+  roll_text = new QLabel("Roll Controller Status:");
+  roll_label = new QLabel("Inactive");  // Default state
+  roll_text->setAlignment(Qt::AlignCenter);
+  roll_label->setAlignment(Qt::AlignCenter);
+  roll_text->setFont(font);
+
 
   QGroupBox* groupBox = new QGroupBox();
 
@@ -47,6 +60,17 @@ VehicleInformationWidget::VehicleInformationWidget(QWidget* parent)
   topic_layout->addWidget( ground_speed_label );
   topic_layout->addWidget( ping_text );
   topic_layout->addWidget( ping_label );
+
+  // Add roll controller indicator to the layout
+  topic_layout->addWidget(roll_text);
+  topic_layout->addWidget(roll_label);
+
+  QHBoxLayout* heartbeat_layout = new QHBoxLayout;
+  heartbeat_layout->addWidget(heartbeat_text);
+  heartbeat_layout->addWidget(heartbeat_label);
+
+  topic_layout->addLayout(heartbeat_layout);  // Add the heartbeat layout
+
 
   groupBox->setLayout(topic_layout);
 
@@ -70,7 +94,36 @@ void VehicleInformationWidget::setAlt(float alt)
   alt_label->setText(QString("%1").arg(alt));
 }
 
-void VehicleInformationWidget::setPingDistance(float distance) {
+void VehicleInformationWidget::setPingInfo(float distance, float confidence) {
+    QString text = QString("Distance: %1 mm | Confidence: %2%")
+                       .arg(distance, 0, 'f', 2)
+                       .arg(confidence, 0, 'f', 1);  // Display as percentage
+    ping_label->setText(text);
+}
 
-    ping_label->setText(QString("%1").arg(distance));
+
+void VehicleInformationWidget::setHeartbeat(const QString& pi_status, const QString& teensy_status)
+{
+    QString pi_color = (pi_status == "Connected") ? "green" : "red";
+    QString teensy_color = (teensy_status == "Connected") ? "green" : "red";
+
+    // Apply the style to the label with HTML formatting
+    QString styled_text = QString(
+        "<span style='color:%1'>Pi: %2</span> | <span style='color:%3'>Teensy: %4</span>")
+        .arg(pi_color, pi_status, teensy_color, teensy_status);
+
+    heartbeat_label->setText(styled_text);
+}
+
+// Function to set roll controller status
+void VehicleInformationWidget::setRollStatus(bool active)
+{
+    QString status = active ? "Active" : "Inactive";
+    QString color = active ? "green" : "red";
+
+    // Use HTML formatting to color the text
+    QString styled_text = QString("<span style='color:%1'>%2</span>")
+                              .arg(color, status);
+
+    roll_label->setText(styled_text);
 }

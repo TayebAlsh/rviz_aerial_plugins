@@ -38,8 +38,12 @@
 #include "rviz_common/properties/ros_topic_property.hpp"
 #include "tf2/utils.h"
 #include "atl_msgs/msg/depth.hpp"
+#include <atl_msgs/msg/ping_data.hpp>
 #include <sensor_msgs/msg/imu.hpp> 
 #include "std_msgs/msg/float32.hpp"
+#include <QTimer>
+#include <QProcess>
+#include "atl_msgs/msg/servos_input.hpp"
 
 #endif
 
@@ -58,16 +62,28 @@ public:
   ~FlighInfoDisplay() override;
 
   void onInitialize() override;
+  void checkHeartbeat();
+  void updateHeartbeatStatus(const QString& pi_status, const QString& teensy_status);
 
 private:
   rclcpp::Subscription<atl_msgs::msg::Depth>::SharedPtr vehicle_odometry_sub_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr vehicle_attitude_sub_;
-  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr ping_distance_sub_;
-
+  rclcpp::Subscription<atl_msgs::msg::PingData>::SharedPtr ping_distance_sub_;
+  rclcpp::Subscription<atl_msgs::msg::ServosInput>::SharedPtr servos_input_sub_;
+  
 
 
   void subcribe2topics();
   void add_namespaces_to_combobox();
+  
+
+  QTimer* heartbeat_timer_;  // Timer to periodically check heartbeat
+
+  QString pi_ip_ = "192.168.1.100";  // Raspberry Pi IP
+  QString teensy_ip_ = "192.168.1.101";  // Teensy IP
+
+  QString pi_last_status_ = "Unknown";  // Store last status
+  QString teensy_last_status_ = "Unknown";
 
 private slots:
   void on_changed_namespace(const QString& text);
