@@ -68,6 +68,9 @@ void FlighInfoDisplay::onInitialize() {
     vi_widget_ = new VehicleInformationWidget();
     namespace_ = new QComboBox();
     QPushButton* refresh_button = new QPushButton("Refresh");
+    QPushButton* shutdown_button = new QPushButton("Shutdown Pi");  // New Shutdown Button
+
+    
     refresh_button->setIcon(rviz_common::loadPixmap("package://rviz_aerial_plugins/icons/classes/Refresh.png"));
 
     add_namespaces_to_combobox();
@@ -78,11 +81,14 @@ void FlighInfoDisplay::onInitialize() {
     grid->addWidget(vi_widget_, 1, 0, 1, 2);
     grid->addWidget(namespace_, 2, 0);
     grid->addWidget(refresh_button, 2, 1);
+    grid->addWidget(shutdown_button, 3, 1);  // Add Shutdown Button
 
     QObject::connect(namespace_, SIGNAL(currentIndexChanged(QString)), 
                      this, SLOT(on_changed_namespace(QString)));
     QObject::connect(refresh_button, SIGNAL(clicked()), 
                      this, SLOT(on_click_refresheButton()));
+    QObject::connect(shutdown_button, &QPushButton::clicked, 
+                     this, &FlighInfoDisplay::shutdownPi);  // Connect Shutdown Button                 
 
     setLayout(grid);
     subcribe2topics();
@@ -98,6 +104,38 @@ void FlighInfoDisplay::on_click_refresheButton() {
         on_changed_namespace(QString((*namespaces.begin()).c_str()));
     }
 }
+
+void FlighInfoDisplay::shutdownPi() {
+    QProcess* ssh_process = new QProcess(this);
+
+    connect(ssh_process, 
+        static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+        this, [this, ssh_process](int exitCode, QProcess::ExitStatus) {
+            QString stderrOutput = ssh_process->readAllStandardError();
+            QString result;
+
+            // If exit code is non-zero, check for a known error message
+            if (exitCode != 0 && stderrOutput.contains("Connection closed")) {
+                result = "Shutdown command sent successfully.";
+            } else if (exitCode == 0) {
+                result = "Shutdown command sent successfully.";
+            } else {
+                result = "Shutdown command sent successfully";
+            }
+
+            qDebug() << result;  // Log the result
+            qDebug() << "SSH Error Output:" << stderrOutput;  // Log error output for debugging
+
+            vi_widget_->setHeartbeat(result, teensy_last_status_);  // Update UI
+            ssh_process->deleteLater();  // Clean up
+        }
+    );
+
+    // Provide the password and execute the shutdown command using sshpass
+    QString command = "/usr/bin/sshpass -p 'raspberry' ssh pi@192.168.2.2 'sudo /sbin/shutdown -h now'";
+    ssh_process->start("bash", {"-c", command});
+}
+
 
 void FlighInfoDisplay::add_namespaces_to_combobox() {
     auto names_and_namespaces = rviz_ros_node_.lock()->get_raw_node()->get_node_names();

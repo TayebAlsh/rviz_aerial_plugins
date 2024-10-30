@@ -64,6 +64,7 @@ public:
   void onInitialize() override;
   void checkHeartbeat();
   void updateHeartbeatStatus(const QString& pi_status, const QString& teensy_status);
+  void shutdownPi();
 
 private:
   rclcpp::Subscription<atl_msgs::msg::Depth>::SharedPtr vehicle_odometry_sub_;
@@ -88,6 +89,7 @@ private:
 private slots:
   void on_changed_namespace(const QString& text);
   void on_click_refresheButton();
+  
 
 protected:
   CompassWidget* compass_widget_;
