@@ -19,6 +19,10 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QGroupBox>
+#include <QPushButton>
+#include <QLineEdit>     // Include QLineEdit for editable PID values
+#include <std_msgs/msg/float32_multi_array.hpp>
+
 
 #include "rviz_common/ros_integration/ros_node_abstraction_iface.hpp"
 
@@ -33,6 +37,7 @@ public:
     void setFlightTime();
     void setHeartbeat(const QString& pi_status, const QString& teensy_status);
     void setRollStatus(bool active);
+    void publishPIDValues();  // Slot for publishing PID values
 
 private:
     QLabel* alt_text;
@@ -45,6 +50,18 @@ private:
     QLabel* heartbeat_label;
     QLabel* roll_text;
     QLabel* roll_label;
+
+       // PID input fields
+    QLineEdit* p_input;
+    QLineEdit* i_input;
+    QLineEdit* d_input;
+
+    // Publish button for PID values
+    QPushButton* publish_pid_button;
+
+      // ROS 2 Node and Publisher for PID values
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr pid_publisher_;
     
 };
 

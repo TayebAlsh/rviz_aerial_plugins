@@ -108,32 +108,33 @@ void FlighInfoDisplay::on_click_refresheButton() {
 void FlighInfoDisplay::shutdownPi() {
     QProcess* ssh_process = new QProcess(this);
 
+    // Attempt with the first set of credentials
+    QString command1 = "/usr/bin/sshpass -p 'raspberry' ssh pi@192.168.2.2 'sudo /sbin/shutdown -h now'";
+    ssh_process->start("bash", {"-c", command1});
+    
     connect(ssh_process, 
         static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
         this, [this, ssh_process](int exitCode, QProcess::ExitStatus) {
-            QString stderrOutput = ssh_process->readAllStandardError();
-            QString result;
-
-            // If exit code is non-zero, check for a known error message
-            if (exitCode != 0 && stderrOutput.contains("Connection closed")) {
-                result = "Shutdown command sent successfully.";
-            } else if (exitCode == 0) {
-                result = "Shutdown command sent successfully.";
+            if (exitCode != 0) {
+                // If the first attempt fails, try the second set of credentials
+                QProcess* ssh_process2 = new QProcess(this);
+                QString command2 = "/usr/bin/sshpass -p 'deepwater' ssh dwe@192.168.2.2 'sudo /sbin/shutdown -h now'";
+                ssh_process2->start("bash", {"-c", command2});
+                
+                connect(ssh_process2, 
+                    static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+                    this, [this, ssh_process2](int exitCode2, QProcess::ExitStatus) {
+                        QString result = (exitCode2 == 0) ? "Shutdown command sent successfully." : "shutdown ongoing.";
+                        qDebug() << result;
+                        ssh_process2->deleteLater();  // Clean up
+                    }
+                );
             } else {
-                result = "Shutdown command sent successfully";
+                qDebug() << "Shutdown command sent successfully.";
             }
-
-            qDebug() << result;  // Log the result
-            qDebug() << "SSH Error Output:" << stderrOutput;  // Log error output for debugging
-
-            vi_widget_->setHeartbeat(result, teensy_last_status_);  // Update UI
             ssh_process->deleteLater();  // Clean up
         }
     );
-
-    // Provide the password and execute the shutdown command using sshpass
-    QString command = "/usr/bin/sshpass -p 'raspberry' ssh pi@192.168.2.2 'sudo /sbin/shutdown -h now'";
-    ssh_process->start("bash", {"-c", command});
 }
 
 
@@ -177,7 +178,7 @@ void FlighInfoDisplay::subcribe2topics() {
 
     vehicle_odometry_sub_ = rviz_ros_node_.lock()->get_raw_node()->create_subscription<atl_msgs::msg::Depth>(
         "/depth", 10, [this](const atl_msgs::msg::Depth::SharedPtr msg) {
-            vi_widget_->setGroundSpeed(-msg->temperature);
+            vi_widget_->setGroundSpeed(msg->temperature);
             vi_widget_->setAlt(msg->depth);
             vi_widget_->update();
         });
